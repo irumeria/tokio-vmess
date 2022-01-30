@@ -3,6 +3,9 @@ an Asynchronous proxy implement with http / socks5 in-bound and vmess out-bound,
 
 # Run example
 
+first, Fill out the nessary msg in src/main.rs
+
+Then,
 ```
 cargo run 
 ```
