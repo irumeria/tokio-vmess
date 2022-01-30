@@ -55,7 +55,7 @@ pub fn parse_uid(x: &str) -> Option<[u8; 16]> {
     let list: Vec<_> = (0..32)
       .step_by(2)
       .map(|i| u8::from_str_radix(&x[i..i + 2], 16).unwrap())
-      .collect();// 这里list变成Vec<>
+      .collect();
   
     let i = list.try_into().ok();
     i     
