@@ -2,11 +2,11 @@ use i2ray::*;
 use std::io::Result;
 #[tokio::main]
 async fn main() -> Result<()> {
-    let port = 18001;
-    let proxy_type = "socks";
-    let proxy_dist_socks = "";//here goes the ip:port of vmess proxy server 
-    let uuid = ""; //here goes the uuid of vmess proxy server 
-    let proxy_dist_http = "127.0.0.1:10809";
+    let port = 18001; //  in-bound port
+    let proxy_type = "socks"; // in-bound type
+    let proxy_dist_socks = "";// here goes the ip:port of vmess proxy server 
+    let uuid = ""; // here goes the uuid of vmess proxy server 
+    let proxy_dist_http = ""; // ip:port of the dist http proxy server
     println!("address : {},type:{}", "0.0.0.0", proxy_type);
 
     if proxy_type == "http" {
