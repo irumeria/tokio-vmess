@@ -6,7 +6,7 @@ an Asynchronous proxy implement with http / socks5 in-bound and vmess out-bound,
 ```json
 {
     "port": 18002,
-    "proxy_type" : "socks", // or "http"
+    "proxy_type" : "socks", 
     "proxy_dist" : "ip:port",
     "uuid" : "uuid of vmess proxy server"
 }
