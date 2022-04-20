@@ -5,7 +5,7 @@ use std::io::Result;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::Arc;
 use tokio::{
-    io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt},
+    io::{ AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
 };
 
@@ -33,30 +33,6 @@ impl Socks5Server {
     }
 }
 
-#[allow(dead_code)]
-async fn copy<'a, T: AsyncRead + Unpin, U: AsyncWrite + Unpin>(sk1: &'a mut T, sk2: &'a mut U) {
-    let mut buf = [0; 1024];
-    loop {
-        let len = sk1.read(&mut buf[..]).await;
-        if let Err(err) = len {
-            warn!("copy: read error: {:?}", err);
-            break;
-        }
-
-        let len = len.unwrap();
-        if len == 0 {
-            break;
-        }
-
-        match sk2.write_all(&buf[..len]).await {
-            Err(err) => {
-                warn!("copy: write error: {:?}", err);
-                break;
-            }
-            _ => {}
-        }
-    }
-}
 
 fn decode_atyp(atyp: u8, len: usize, buf: &[u8; 1024]) -> Result<(String, Vec<u8>, Vec<u8>)> {
     let addr;
@@ -258,32 +234,4 @@ async fn vmess_proxy(
         }
     }
     Ok(())
-}
-
-#[allow(dead_code)]
-async fn plain_proxy(mut stream: TcpStream, addr: String) -> Result<()> {
-    let up_stream = match TcpStream::connect(addr).await {
-        Ok(s) => s,
-        Err(e) => {
-            warn!("Upstream connect failed, {}", e);
-            stream
-                .write_all(b"\x05\x01\x00\x01\x00\x00\x00\x00\x00\x00")
-                .await?;
-            return Ok(());
-        }
-    };
-
-    stream
-        .write_all(b"\x05\x00\x00\x01\x00\x00\x00\x00\x00\x00")
-        .await?;
-
-    let (mut ri, mut wi) = stream.into_split();
-    let (mut ro, mut wo) = up_stream.into_split();
-
-    tokio::spawn(async move {
-        copy(&mut ro, &mut wi).await;
-    });
-
-    copy(&mut ri, &mut wo).await;
-    return Ok(());
 }
