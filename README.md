@@ -1,4 +1,5 @@
 # tokio-vmess
+Write a v2ray core for fun
 an Asynchronous proxy implement with http / socks5 in-bound and vmess out-bound, written in Rust and tokio
 
 ## Config 
