@@ -6,7 +6,7 @@ use tokio::fs;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ProxyConfig {
-    port: u16,          //  in-bound port
+    port: u16,          // in-bound port
     proxy_type: String, // in-bound type
     proxy_dist: String, // here goes the ip:port of vmess proxy server
     uuid: String,       // here goes the uuid of vmess proxy server
