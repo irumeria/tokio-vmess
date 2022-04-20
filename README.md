@@ -19,7 +19,7 @@ an Asynchronous proxy implement with http / socks5 in-bound and vmess out-bound,
 ```bash
 $ cargo run ./config.json 
 ```
-+ comile
++ compile
 ```bash
 $ cargo build --release
 ```
