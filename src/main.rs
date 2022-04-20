@@ -27,7 +27,6 @@ async fn main() -> Result<()> {
     println!("address : {},type:{}", "0.0.0.0", proxy_config.proxy_type);
 
     if proxy_config.proxy_type == "http" {
-        // TO DO: HTTP in-bound do not access to vmess out-bound yet
         let http_server = HttpServer::new(proxy_config.port);
         http_server
             .listen(
