@@ -32,3 +32,21 @@ macro_rules! md5 {
         result
     }}
 }
+
+pub fn is_normal_close(e: &std::io::Error) -> bool {
+    matches!(
+      e.kind(),
+      std::io::ErrorKind::BrokenPipe
+        | std::io::ErrorKind::UnexpectedEof
+        | std::io::ErrorKind::ConnectionReset
+    )
+}
+
+pub trait SizedExtForApply: Sized {
+    fn apply(mut self, f: impl FnOnce(&mut Self)) -> Self {
+        f(&mut self);
+        self
+    }
+}
+
+impl<T: Sized> SizedExtForApply for T {}

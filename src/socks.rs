@@ -3,49 +3,37 @@ use byteorder::{BigEndian, ByteOrder};
 use rand::prelude::*;
 use std::io::Result;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::sync::Arc;
 use tokio::{
     io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt},
     net::{TcpListener, TcpStream},
 };
-pub trait SizedExtForApply: Sized {
-    fn apply(mut self, f: impl FnOnce(&mut Self)) -> Self {
-        f(&mut self);
-        self
-    }
-}
 
-impl<T: Sized> SizedExtForApply for T {}
 
 pub struct Socks5Server {
     port: u16,
 }
-fn is_normal_close(e: &std::io::Error) -> bool {
-    matches!(
-      e.kind(),
-      std::io::ErrorKind::BrokenPipe
-        | std::io::ErrorKind::UnexpectedEof
-        | std::io::ErrorKind::ConnectionReset
-    )
-}
+
 
 impl Socks5Server {
     pub fn new(port: u16) -> Socks5Server {
         Socks5Server { port }
     }
 
-    pub async fn listen(&self, proxy_dist: &'static str,uuid: [u8; 16]) -> Result<()> {
+    pub async fn listen(&self, proxy_dist:String,uuid: [u8; 16]) -> Result<()> {
         let listener = TcpListener::bind(String::from("0.0.0.0:") + &self.port.to_string()).await?;
-
+        let _proxy_dist = Arc::new(proxy_dist);
         loop {
+            let _proxy_dist = (*_proxy_dist).clone();
             let (stream, _) = listener.accept().await?;
             tokio::spawn(async move {
-                handle_socks(stream, proxy_dist,uuid).await.unwrap();
+                handle_socks(stream, _proxy_dist,uuid).await.unwrap();
             });
         }
-        Ok(())
     }
 }
 
+#[allow(dead_code)]
 async fn copy<'a, T: AsyncRead + Unpin, U: AsyncWrite + Unpin>(sk1: &'a mut T, sk2: &'a mut U) {
     let mut buf = [0; 1024];
     loop {
@@ -132,7 +120,7 @@ fn decode_atyp(atyp: u8, len: usize, buf: &[u8; 1024]) -> Result<(String, Vec<u8
     Ok((addr, ipbuf, portbuf))
 }
 
-async fn handle_socks(mut stream: TcpStream, server: &str,uuid: [u8; 16]) -> Result<()> {
+async fn handle_socks(mut stream: TcpStream, server: String,uuid: [u8; 16]) -> Result<()> {
     let mut buf = [0; 1024];
 
     let len = stream.read(&mut buf).await?;
@@ -170,11 +158,12 @@ async fn handle_socks(mut stream: TcpStream, server: &str,uuid: [u8; 16]) -> Res
 
     let (addr, ipbuf, portbuf) = decode_atyp(atyp, len, &buf).unwrap();
 
-    vmess_proxy(stream, server, (addr, ipbuf, portbuf),uuid).await?;
+    vmess_proxy(stream, &server, (addr, ipbuf, portbuf),uuid).await?;
 
     Ok(())
 }
 
+#[allow(non_snake_case)]
 async fn vmess_proxy(
     mut stream_c: TcpStream,
     server: &str,
@@ -183,7 +172,7 @@ async fn vmess_proxy(
 ) -> Result<()> {
     let stream_p = TcpStream::connect(&server).await?;
     debug!("connect {} through proxy", &addr);
-
+    println!("{:?},{:?}",ipbuf,portbuf);
     let proxy_info = stream_p.local_addr()?; 
 
     let proxy_port = proxy_info.port();
@@ -271,6 +260,7 @@ async fn vmess_proxy(
     Ok(())
 }
 
+#[allow(dead_code)]
 async fn plain_proxy(mut stream: TcpStream, addr: String) -> Result<()> {
     let up_stream = match TcpStream::connect(addr).await {
         Ok(s) => s,

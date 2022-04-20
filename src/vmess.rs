@@ -69,6 +69,9 @@ pub async fn handshake_read(v_read:&mut OwnedReadHalf,decoder:&mut AES128CFB) ->
     decoder.decode(&mut head);
 
     println!("vmess head:{:?}",head);
+    if head[0] == 39{
+        // DO SOMETHING...
+    }
     let command_len = head[3] as usize;
     let mut buf = Vec::with_capacity(command_len);
     v_read.read_exact(&mut buf).await?;
@@ -155,6 +158,7 @@ pub async fn handshake_write(v_write :&mut OwnedWriteHalf, user_id: [u8; 16], (i
         }
         _ => {
             println!("invaild ip length:{:?}",ip.len());
+            panic!();
         }
     } 
     let P = [0; P_LEN as usize];
